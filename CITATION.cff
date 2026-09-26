@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this project, please cite the published article below."
+title: "DeepCard"
+type: software
+authors:
+  - family-names: Wen
+    given-names: Zhihong
+  - family-names: Liu
+    given-names: Xiangpeng
+  - family-names: Liu
+    given-names: Yi
+  - family-names: Tang
+    given-names: Wenbo
+  - family-names: An
+    given-names: Kang
+  - family-names: Guo
+    given-names: Shengli
+repository-code: "https://github.com/wenzhihong168/Deepcard"
+url: "https://doi.org/10.1016/j.isci.2026.116904"
+identifiers:
+  - type: doi
+    value: "10.1016/j.isci.2026.116904"
+    description: "Published article"
+preferred-citation:
+  type: article
+  title: "A Deep Learning Framework for Standardized Interpretation of Multiparameter Cardiac Ultrasound and Disease Classification"
+  authors:
+    - family-names: Wen
+      given-names: Zhihong
+    - family-names: Liu
+      given-names: Xiangpeng
+    - family-names: Liu
+      given-names: Yi
+    - family-names: Tang
+      given-names: Wenbo
+    - family-names: An
+      given-names: Kang
+    - family-names: Guo
+      given-names: Shengli
+  journal: "iScience"
+  volume: 29
+  issue: 8
+  year: 2026
+  doi: "10.1016/j.isci.2026.116904"
