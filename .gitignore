@@ -1,0 +1,23 @@
+# Python and notebooks
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+
+# Local clinical data
+data/
+datasets/private/
+
+# Training artifacts
+checkpoints/
+runs/
+outputs/
+*.ckpt
+*.pt
+*.pth
+
+# Local system files
+.DS_Store
+.idea/
+.vscode/
