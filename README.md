@@ -6,38 +6,61 @@
 
 [![Paper](https://img.shields.io/badge/Paper-iScience_2026-5B5BD6?style=flat-square)](https://doi.org/10.1016/j.isci.2026.116904)
 [![Open Access](https://img.shields.io/badge/Open_Access-CC_BY--NC--ND_4.0-2A9D8F?style=flat-square)](https://doi.org/10.1016/j.isci.2026.116904)
+[![Tasks](https://img.shields.io/badge/Tasks-17-8B5CF6?style=flat-square)](#results)
 [![Code](https://img.shields.io/badge/Code-available-2563EB?style=flat-square)](DeepCard)
+
+<sub>39 measurements · 17 diagnostic tasks · external validation</sub>
 
 </div>
 
-DeepCard jointly interprets 39 quantitative echocardiographic measurements across 17 diagnostic tasks with external validation.
+<p align="center">
+  <img src="assets/graphical-abstract.png" width="920" alt="DeepCard graphical abstract">
+</p>
+
+DeepCard transforms pre-measured echocardiographic parameters into standardized, multi-task clinical interpretations.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    A[39 echo measurements] --> B[Residual 1D CNN]
-    B --> C[Multi-head attention]
-    C --> D[Shared representation]
-    D --> E[8 severity tasks]
-    D --> F[9 binary tasks]
-```
+<p align="center">
+  <img src="assets/architecture.png" width="940" alt="DeepCard acquisition, architecture, and optimization framework">
+</p>
 
 ## Results
 
-| Valvular specificity | Ventricular accuracy | External performance drop |
-|:---:|:---:|:---:|
-| **91%** | **82%** | **2.6%** |
+| Validation | Sensitivity | Precision | F1 | Accuracy |
+|:---|:---:|:---:|:---:|:---:|
+| Internal | **0.77** | **0.74** | **0.75** | **0.77** |
+| External · n=102 | **0.75** | **0.72** | **0.73** | **0.75** |
+
+| Representative external endpoint | Result |
+|:---|:---|
+| Mitral regurgitation | Sensitivity **0.85** · Specificity **0.89** · F1 **0.84** |
+| LV systolic dysfunction | Accuracy **0.79** |
+| LV diastolic dysfunction | Accuracy **0.77** |
+
+### Multiclass severity discrimination
 
 <p align="center">
-  <img src="assets/results.png" width="900" alt="DeepCard ROC results">
+  <img src="assets/results-multiclass-roc.png" width="940" alt="DeepCard multiclass ROC results">
+</p>
+
+### Binary disease discrimination
+
+<p align="center">
+  <img src="assets/results-binary-roc.png" width="900" alt="DeepCard binary ROC results with confidence intervals">
+</p>
+
+### Task-wise interpretability
+
+<p align="center">
+  <img src="assets/results-shap.png" width="940" alt="DeepCard task-wise SHAP feature importance">
 </p>
 
 ## Repository layout
 
 ```text
 Deepcard/
-├── assets/                 # result figures
+├── assets/                 # graphical abstract, architecture, and results
 ├── DeepCard/
 │   ├── model.py            # multi-task network
 │   ├── train.py            # stratified training pipeline
