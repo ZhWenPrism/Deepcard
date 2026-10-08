@@ -10,6 +10,7 @@ Technical notes for the public DeepCard research repository.
 | [Artifact manifest](ARTIFACT_MANIFEST.md) | Links schemas, task definitions, models, SHAP tables, and figures |
 | [Failure analysis](FAILURE_ANALYSIS.md) | Reviews rare tasks, ordinal errors, missingness, and cohort drift |
 | [Reproducibility scope](REPRODUCIBILITY.md) | States patient-level split and clinical-data boundaries |
+| [Release checklist](RELEASE_CHECKLIST.md) | Verifies task definitions, clinical privacy, and external validation |
 
 ## Recommended order
 
