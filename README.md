@@ -123,7 +123,7 @@ Deepcard/
 └── README.md
 ```
 
-The existing lightweight implementation is preserved. Newly added modular subdirectories are empty placeholders for subsequent code organization.
+The existing lightweight implementation is preserved and now complemented by validated 39-feature/17-task contracts, dependency-light evaluation metrics, a canonical task registry, structured reporting utilities, unit tests, and CI. Training still requires the dependencies and private data described in `DeepCard/requirements.txt` and `DeepCard/DATA_FORMAT.md`.
 
 <details>
 <summary><b>Citation</b></summary>
