@@ -21,19 +21,37 @@ DeepCard maps pre-measured echocardiographic parameters to standardized diagnost
 
 ## At a glance
 
-| Input | Shared representation | Outputs | Interpretation |
-|:---|:---|:---|:---|
-| 39 quantitative echo measurements | Residual 1D CNN + attention | 8 multiclass + 9 binary tasks | Task-wise SHAP attribution |
+<table align="center">
+  <tr align="center">
+    <th>Input</th><th>Shared representation</th><th>Outputs</th><th>Interpretation</th>
+  </tr>
+  <tr align="center">
+    <td>39 quantitative<br>echo measurements</td>
+    <td>Residual 1D CNN<br>+ attention</td>
+    <td>8 multiclass<br>+ 9 binary tasks</td>
+    <td>Task-wise<br>SHAP attribution</td>
+  </tr>
+</table>
 
-| Training cohort | Internal test | External cohort | External degradation |
-|:---:|:---:|:---:|:---:|
-| **400 patients** | **100 patients** | **102 patients** | **2.6% mean** |
+<table align="center">
+  <tr align="center">
+    <th>Training cohort</th><th>Internal test</th><th>External cohort</th><th>External degradation</th>
+  </tr>
+  <tr align="center">
+    <td><b>400 patients</b></td><td><b>100 patients</b></td><td><b>102 patients</b></td><td><b>2.6% mean</b></td>
+  </tr>
+</table>
 
 ## Task space
 
-| Valvular and pressure | Ventricular function | Structural findings |
-|:---|:---|:---|
-| MR · TR · AR · AS · PR · PAP | LVDD · LVSD · LAE · RAE · LVE | RVE · LVH · IVST · PE · WMA · VSD |
+<table align="center">
+  <tr align="center">
+    <th>Valvular and pressure</th><th>Ventricular function</th><th>Structural findings</th>
+  </tr>
+  <tr align="center">
+    <td>MR · TR · AR · AS · PR · PAP</td><td>LVDD · LVSD · LAE · RAE · LVE</td><td>RVE · LVH · IVST · PE · WMA · VSD</td>
+  </tr>
+</table>
 
 ## Model design
 
@@ -46,64 +64,77 @@ DeepCard maps pre-measured echocardiographic parameters to standardized diagnost
 
 ## Architecture
 
+DeepCard treats quantitative echocardiographic measurements as a clinically ordered sequence. A residual 1D encoder and attention layer build a shared representation, while task-specific heads produce eight severity-graded and nine binary diagnostic outputs.
+
 <p align="center">
-  <img src="assets/architecture.png" width="940" alt="DeepCard acquisition, architecture, and optimization framework">
+  <img src="assets/architecture.png" width="940" alt="DeepCard acquisition, architecture, and optimization framework"><br>
+  <sub>Figure 4. Measurement standardization, shared representation, and multi-task optimization.</sub>
 </p>
 
 ## Results
 
-| Validation | Sensitivity | Precision | F1 | Accuracy |
-|:---|:---:|:---:|:---:|:---:|
-| Internal | **0.77** | **0.74** | **0.75** | **0.77** |
-| External · n=102 | **0.75** | **0.72** | **0.73** | **0.75** |
+<table align="center">
+  <tr align="center">
+    <th>Validation</th><th>Sensitivity</th><th>Precision</th><th>F1</th><th>Accuracy</th>
+  </tr>
+  <tr align="center"><td>Internal</td><td><b>0.77</b></td><td><b>0.74</b></td><td><b>0.75</b></td><td><b>0.77</b></td></tr>
+  <tr align="center"><td>External · n=102</td><td><b>0.75</b></td><td><b>0.72</b></td><td><b>0.73</b></td><td><b>0.75</b></td></tr>
+</table>
 
-| Clinical endpoint | Published result |
-|:---|:---|
-| Valvular assessment | **91% specificity** |
-| Ventricular evaluation | **82% accuracy** |
-| Inter-observer variability | Reduced to **13.4%** |
-| External mitral regurgitation | Sensitivity **0.85** · Specificity **0.89** · F1 **0.84** |
+<table align="center">
+  <tr align="center"><th>Clinical endpoint</th><th>Published result</th></tr>
+  <tr align="center"><td>Valvular assessment</td><td><b>91% specificity</b></td></tr>
+  <tr align="center"><td>Ventricular evaluation</td><td><b>82% accuracy</b></td></tr>
+  <tr align="center"><td>Inter-observer variability</td><td>Reduced to <b>13.4%</b></td></tr>
+  <tr align="center"><td>External mitral regurgitation</td><td>Sensitivity <b>0.85</b> · Specificity <b>0.89</b> · F1 <b>0.84</b></td></tr>
+</table>
 
 ### Multiclass severity discrimination
 
+Severity-specific ROC curves show how discrimination changes from mild to severe disease across eight graded endpoints. Performance is strongest for clinically advanced valvular disease while remaining stable across ventricular-function grades.
+
 <p align="center">
-  <img src="assets/results-multiclass-roc.png" width="940" alt="DeepCard multiclass ROC results">
+  <img src="assets/results-multiclass-roc.png" width="940" alt="DeepCard multiclass ROC results"><br>
+  <sub>Figure 5. Multiclass ROC analysis for severity-graded endpoints.</sub>
 </p>
 
 ### Binary disease discrimination
 
+Nine binary tasks cover chamber enlargement, hypertrophy, effusion, wall-motion abnormality, and septal defect. Class-wise confidence bands expose both discrimination and uncertainty for the presence and absence of each finding.
+
 <p align="center">
-  <img src="assets/results-binary-roc.png" width="900" alt="DeepCard binary ROC results with confidence intervals">
+  <img src="assets/results-binary-roc.png" width="900" alt="DeepCard binary ROC results with confidence intervals"><br>
+  <sub>Figure 6. Binary ROC curves with 95% confidence intervals.</sub>
 </p>
 
-### Task-wise interpretability
+### Error structure
+
+Confusion matrices complement aggregate metrics by showing where errors occur within each endpoint. Binary matrices expose class imbalance and false-negative patterns; multiclass matrices show whether errors remain close to the neighboring severity grade.
 
 <p align="center">
-  <img src="assets/results-shap.png" width="940" alt="DeepCard task-wise SHAP feature importance">
+  <img src="assets/confusion-matrices-binary.png" width="860" alt="Binary-task confusion matrices"><br>
+  <sub>Figure 7. Confusion matrices for the nine binary endpoints.</sub>
 </p>
 
-### Error structure and external reliability
+<p align="center">
+  <img src="assets/confusion-matrices-multiclass.png" width="860" alt="Multiclass confusion matrices"><br>
+  <sub>Figure 8. Confusion matrices for the eight severity-graded endpoints.</sub>
+</p>
 
-<table>
-  <tr>
-    <td width="50%"><img src="assets/confusion-matrices-binary.png" alt="Binary-task confusion matrices"></td>
-    <td width="50%"><img src="assets/confusion-matrices-multiclass.png" alt="Multiclass confusion matrices"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Binary endpoints</sub></td>
-    <td align="center"><sub>Severity-graded endpoints</sub></td>
-  </tr>
-</table>
+### Task-wise interpretation
 
-<table>
-  <tr>
-    <td width="50%"><img src="assets/integrated-results.png" alt="Integrated DeepCard task and performance overview"></td>
-    <td width="50%"><img src="assets/physician-consistency.png" alt="Physician-specialty and demographic consistency analysis"></td>
-  </tr>
-</table>
+Global SHAP importance identifies the measurements consistently used across diagnostic tasks. The task-by-feature heatmap preserves differences between valvular, functional, and structural endpoints instead of collapsing interpretation into a single ranking.
 
 <p align="center">
-  <img src="assets/local-shap.png" width="900" alt="Local SHAP profiles for four representative DeepCard tasks">
+  <img src="assets/results-shap.png" width="940" alt="DeepCard task-wise SHAP feature importance"><br>
+  <sub>Figure 10. Global task-wise feature attribution.</sub>
+</p>
+
+Local SHAP profiles provide a more detailed view for representative tasks, linking the direction and magnitude of individual measurements to each model output.
+
+<p align="center">
+  <img src="assets/local-shap.png" width="900" alt="Local SHAP profiles for four representative DeepCard tasks"><br>
+  <sub>Figure 11. Local attribution profiles for four representative tasks.</sub>
 </p>
 
 Published tables: [task metrics with confidence intervals](results/disease_performance_with_ci.csv) · [external validation](results/internal_external_validation.csv) · [baseline benchmark](results/baseline_benchmark.csv) · [ordering ablation](results/ordering_ablation.csv)
