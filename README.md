@@ -14,10 +14,12 @@
 </div>
 
 <p align="center">
-  <img src="assets/graphical-abstract.png" width="920" alt="DeepCard graphical abstract">
+  <img src="assets/graphical-abstract.png" alt="DeepCard graphical abstract">
 </p>
 
 DeepCard maps pre-measured echocardiographic parameters to standardized diagnostic interpretations, targeting the interpretation layer rather than image acquisition or automated caliper placement.
+
+The model addresses a distinct source of variability in cardiac ultrasound: clinicians may reach different diagnostic interpretations even when working from the same standardized measurements. DeepCard therefore does not replace acquisition or measurement protocols. It learns a reproducible mapping from 39 quantitative parameters to 17 report-level endpoints spanning valvular disease, ventricular function, pressure estimates, chamber remodeling, and structural abnormalities.
 
 ## At a glance
 
@@ -66,8 +68,10 @@ DeepCard maps pre-measured echocardiographic parameters to standardized diagnost
 
 DeepCard treats quantitative echocardiographic measurements as a clinically ordered sequence. A residual 1D encoder and attention layer build a shared representation, while task-specific heads produce eight severity-graded and nine binary diagnostic outputs.
 
+The feature sequence preserves clinically meaningful neighborhoods among chamber dimensions, Doppler measurements, valve-related variables, and functional indices. Residual convolutional blocks capture local interactions, attention redistributes emphasis across the full measurement profile, and separate softmax or sigmoid heads match the label structure of each endpoint. Joint optimization then allows correlated tasks to share statistical strength without forcing them to use identical decision boundaries.
+
 <p align="center">
-  <img src="assets/architecture.png" width="940" alt="DeepCard acquisition, architecture, and optimization framework"><br>
+  <img src="assets/architecture.png" alt="DeepCard acquisition, architecture, and optimization framework"><br>
   <sub>Figure 4. Measurement standardization, shared representation, and multi-task optimization.</sub>
 </p>
 
@@ -81,6 +85,12 @@ DeepCard treats quantitative echocardiographic measurements as a clinically orde
   <tr align="center"><td>External · n=102</td><td><b>0.75</b></td><td><b>0.72</b></td><td><b>0.73</b></td><td><b>0.75</b></td></tr>
 </table>
 
+### Internal and external validation
+
+The internal test set comprised 100 patients, and generalization was assessed in an independent 102-patient cohort from a separate medical center. Mean sensitivity, precision, F1, and accuracy changed from 0.77, 0.74, 0.75, and 0.77 internally to 0.75, 0.72, 0.73, and 0.75 externally. The mean decline in sensitivity across the 17 endpoints was 2.6%.
+
+Performance did not transfer uniformly across tasks. Common valvular and ventricular endpoints retained relatively stable estimates, whereas lower-prevalence structural findings showed wider confidence intervals and should be interpreted more cautiously. The repository therefore reports endpoint-level results and confidence intervals rather than relying only on a single macro average.
+
 <table align="center">
   <tr align="center"><th>Clinical endpoint</th><th>Published result</th></tr>
   <tr align="center"><td>Valvular assessment</td><td><b>91% specificity</b></td></tr>
@@ -93,8 +103,10 @@ DeepCard treats quantitative echocardiographic measurements as a clinically orde
 
 Severity-specific ROC curves show how discrimination changes from mild to severe disease across eight graded endpoints. Performance is strongest for clinically advanced valvular disease while remaining stable across ventricular-function grades.
 
+For mitral, tricuspid, and aortic regurgitation, the severe categories reached AUCs of 0.92, 0.91, and 0.91, respectively. Left-ventricular diastolic dysfunction remained between 0.85 and 0.88 across severity levels, while systolic dysfunction ranged from 0.83 to 0.87. Presenting the full set of class-specific curves makes it possible to distinguish strong severe-disease discrimination from the more difficult separation of adjacent mild and moderate grades.
+
 <p align="center">
-  <img src="assets/results-multiclass-roc.png" width="940" alt="DeepCard multiclass ROC results"><br>
+  <img src="assets/results-multiclass-roc.png" alt="DeepCard multiclass ROC results"><br>
   <sub>Figure 5. Multiclass ROC analysis for severity-graded endpoints.</sub>
 </p>
 
@@ -102,8 +114,10 @@ Severity-specific ROC curves show how discrimination changes from mild to severe
 
 Nine binary tasks cover chamber enlargement, hypertrophy, effusion, wall-motion abnormality, and septal defect. Class-wise confidence bands expose both discrimination and uncertainty for the presence and absence of each finding.
 
+For example, left-atrial enlargement achieved an AUC of 0.82 for disease detection and 0.85 for exclusion, while pericardial-effusion detection reached an AUC of 0.76. These curves should be read together with disease prevalence and interval width: endpoints with fewer positive observations can show apparently acceptable point estimates while retaining greater statistical uncertainty.
+
 <p align="center">
-  <img src="assets/results-binary-roc.png" width="900" alt="DeepCard binary ROC results with confidence intervals"><br>
+  <img src="assets/results-binary-roc.png" alt="DeepCard binary ROC results with confidence intervals"><br>
   <sub>Figure 6. Binary ROC curves with 95% confidence intervals.</sub>
 </p>
 
@@ -111,29 +125,35 @@ Nine binary tasks cover chamber enlargement, hypertrophy, effusion, wall-motion 
 
 Confusion matrices complement aggregate metrics by showing where errors occur within each endpoint. Binary matrices expose class imbalance and false-negative patterns; multiclass matrices show whether errors remain close to the neighboring severity grade.
 
+This distinction matters for clinical interpretation. A one-grade error between adjacent severity categories is not equivalent to confusing a normal examination with severe disease, and a false negative in a low-prevalence structural endpoint has a different implication from a false positive. The full matrices preserve these task-specific error structures rather than compressing them into a single accuracy value.
+
 <p align="center">
-  <img src="assets/confusion-matrices-binary.png" width="860" alt="Binary-task confusion matrices"><br>
+  <img src="assets/confusion-matrices-binary.png" alt="Binary-task confusion matrices"><br>
   <sub>Figure 7. Confusion matrices for the nine binary endpoints.</sub>
 </p>
 
 <p align="center">
-  <img src="assets/confusion-matrices-multiclass.png" width="860" alt="Multiclass confusion matrices"><br>
-  <sub>Figure 8. Confusion matrices for the eight severity-graded endpoints.</sub>
+  <img src="assets/confusion-matrices-multiclass.png" alt="Multiclass confusion matrices"><br>
+  <sub>Figure 8. Confusion matrices for representative severity-graded endpoints.</sub>
 </p>
 
 ### Task-wise interpretation
 
 Global SHAP importance identifies the measurements consistently used across diagnostic tasks. The task-by-feature heatmap preserves differences between valvular, functional, and structural endpoints instead of collapsing interpretation into a single ranking.
 
+The resulting attribution structure is clinically heterogeneous. Pressure-related predictions emphasize right-sided and pulmonary vascular measurements; diastolic dysfunction places greater weight on left-atrial size and filling parameters; systolic dysfunction is driven by global functional markers such as LVEF and LVESD. This pattern shows that the shared encoder does not reduce all tasks to the same generic feature profile.
+
 <p align="center">
-  <img src="assets/results-shap.png" width="940" alt="DeepCard task-wise SHAP feature importance"><br>
+  <img src="assets/results-shap.png" alt="DeepCard task-wise SHAP feature importance"><br>
   <sub>Figure 10. Global task-wise feature attribution.</sub>
 </p>
 
 Local SHAP profiles provide a more detailed view for representative tasks, linking the direction and magnitude of individual measurements to each model output.
 
+Each point represents one patient-level attribution, so the plots show both the global ordering of important variables and the direction in which high or low measurements shift a prediction. The local views are intended as model-behavior evidence rather than causal explanations: they clarify which standardized measurements influenced the output, but they do not establish that changing a measurement would change the underlying disease state.
+
 <p align="center">
-  <img src="assets/local-shap.png" width="900" alt="Local SHAP profiles for four representative DeepCard tasks"><br>
+  <img src="assets/local-shap.png" alt="Local SHAP profiles for four representative DeepCard tasks"><br>
   <sub>Figure 11. Local attribution profiles for four representative tasks.</sub>
 </p>
 
