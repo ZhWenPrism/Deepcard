@@ -14,3 +14,5 @@
 | `physician-consistency.png` | Figure 12 — physician-specialty and demographic consistency analysis |
 
 Figures are reproduced unchanged from the authors' open-access article under CC BY-NC-ND 4.0: [doi:10.1016/j.isci.2026.116904](https://doi.org/10.1016/j.isci.2026.116904).
+
+README-facing figures preserve the complete published canvas and all original panels. They are exported from the final RGB figure sources with an opaque white background; no panel is cropped, recomposed, or placed on transparency.
