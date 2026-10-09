@@ -1,0 +1,8 @@
+model,ordering_condition,macro_f1,delta_f1_vs_baseline,macro_accuracy,delta_accuracy_vs_baseline,macro_auroc
+1D-CNN (DeepCard backbone),Clinical ordering (baseline),0.750,+0.000,0.770,+0.000,0.882
+1D-CNN (DeepCard backbone),Within-block shuffle,0.744,-0.006,0.765,-0.005,0.878
+1D-CNN (DeepCard backbone),Block permutation (shuffle blocks),0.733,-0.017,0.756,-0.014,0.869
+1D-CNN (DeepCard backbone),Reversed order,0.736,-0.014,0.758,-0.012,0.871
+1D-CNN (DeepCard backbone),Full random permutation,0.718,-0.032,0.742,-0.028,0.857
+MLP (order-invariant control),Clinical ordering,0.721,-0.029,0.748,-0.022,0.861
+MLP (order-invariant control),Full random permutation,0.720,-0.030,0.747,-0.023,0.860

@@ -1,0 +1,10 @@
+model_family,baseline_model,macro_f1,macro_accuracy,macro_auroc
+Linear,Logistic regression (OVR),0.66,0.70,0.82
+GBDT,CatBoost,0.70,0.73,0.85
+GBDT,LightGBM,0.71,0.74,0.86
+GBDT,XGBoost,0.72,0.75,0.86
+Tabular DL,TabNet,0.72,0.75,0.87
+Tabular DL,FT-transformer,0.73,0.76,0.87
+MTL baseline,Shared-bottom MLP (17 heads),0.72,0.75,0.86
+MTL baseline,MMoE (8 experts; 17 heads),0.74,0.77,0.88
+Ours,DeepCard (residual 1D-CNN; 17 heads),0.75,0.77,0.88
