@@ -82,11 +82,38 @@ DeepCard maps pre-measured echocardiographic parameters to standardized diagnost
   <img src="assets/results-shap.png" width="940" alt="DeepCard task-wise SHAP feature importance">
 </p>
 
+### Error structure and external reliability
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/confusion-matrices-binary.png" alt="Binary-task confusion matrices"></td>
+    <td width="50%"><img src="assets/confusion-matrices-multiclass.png" alt="Multiclass confusion matrices"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Binary endpoints</sub></td>
+    <td align="center"><sub>Severity-graded endpoints</sub></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/integrated-results.png" alt="Integrated DeepCard task and performance overview"></td>
+    <td width="50%"><img src="assets/physician-consistency.png" alt="Physician-specialty and demographic consistency analysis"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="assets/local-shap.png" width="900" alt="Local SHAP profiles for four representative DeepCard tasks">
+</p>
+
+Published tables: [task metrics with confidence intervals](results/disease_performance_with_ci.csv) · [external validation](results/internal_external_validation.csv) · [baseline benchmark](results/baseline_benchmark.csv) · [ordering ablation](results/ordering_ablation.csv)
+
 ## Codebase blueprint
 
 ```text
 Deepcard/
-├── assets/                         # graphical abstract, architecture, results
+├── assets/                         # graphical abstract, architecture, result figures
+├── results/                        # machine-readable published tables
 ├── DeepCard/
 │   ├── config.py                   # experiment configuration
 │   ├── data.py                     # tabular data ingestion
