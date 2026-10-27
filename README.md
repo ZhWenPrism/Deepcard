@@ -11,6 +11,10 @@
 
 <sub>39 measurements · 17 diagnostic tasks · multi-task learning · external validation</sub>
 
+<p align="center">
+  <a href="#research-overview">Overview</a> · <a href="#architecture">Architecture</a> · <a href="#results">Results</a> · <a href="#quick-start">Quick start</a> · <a href="docs/README.md">Documentation</a>
+</p>
+
 </div>
 
 <p align="center">
@@ -252,6 +256,34 @@ DeepCard depends on the quality and completeness of the measurements supplied to
 The cohort sizes are limited relative to the breadth of the 17-task label space, and rare findings may have wide uncertainty. External validation is based on one additional cohort; broader evaluation across centers, devices, populations, and reporting practices remains necessary. Shifts in disease prevalence may also change predictive values even when sensitivity and specificity remain similar.
 
 The model supports standardized research interpretation and reporting assistance. It is not a substitute for physician review and is not presented as a stand-alone diagnostic device. The public repository exposes the existing lightweight implementation, validated contracts, evaluation utilities, result tables, and documentation, but it does not redistribute the underlying clinical dataset.
+
+## Quick start
+
+The training and evaluation scripts use Python 3.11.
+
+```bash
+git clone https://github.com/ZhWenPrism/Deepcard.git
+cd Deepcard/DeepCard
+python -m pip install -r requirements.txt
+```
+
+Prepare the cohort CSV files using the [input specification](DeepCard/DATA_FORMAT.md), then train and evaluate the ensemble:
+
+```bash
+python run_train.py --train_csv data/train.csv --out artifacts
+python run_evaluate.py --test_csv data/internal_test.csv --artifacts artifacts
+python run_evaluate.py --test_csv data/external.csv --artifacts artifacts
+```
+
+Fold checkpoints and the fitted scaler are saved in `artifacts/`. Evaluation prints metrics for each task.
+
+From the repository root, run the public utility tests with:
+
+```bash
+python -m unittest discover -s DeepCard/tests -v
+```
+
+[Implementation guide](DeepCard/README.md) · [Data interface](docs/DATA_INTERFACE.md) · [Evaluation metrics](docs/METRICS.md)
 
 ## Codebase blueprint
 
