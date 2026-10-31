@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from numbers import Integral
 from typing import Mapping
 
 from ..config import BINARY_TASKS, MULTICLASS_TASKS, SEVERITY_CLASSES
@@ -38,5 +39,7 @@ def validate_task_labels(
         missing = sorted(set(by_name) - set(labels))
         raise ValueError(f"missing task labels: {missing}")
     for name, label in labels.items():
-        if label is not None and label not in range(len(by_name[name].classes)):
+        if label is not None and (
+            not isinstance(label, Integral) or label not in range(len(by_name[name].classes))
+        ):
             raise ValueError(f"label for {name!r} is outside its class range")

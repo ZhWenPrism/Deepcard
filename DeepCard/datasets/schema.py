@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from math import isfinite
+from numbers import Integral
 from types import MappingProxyType
 from typing import Mapping
 
@@ -63,8 +64,10 @@ class ExamRecord:
             raise ValueError("features must be finite or None")
         clean: dict[str, int | None] = {}
         for task, label in self.labels.items():
-            if not task.strip() or (label is not None and label < 0):
-                raise ValueError("labels require non-empty tasks and non-negative values")
+            if not task.strip() or (
+                label is not None and (not isinstance(label, Integral) or label < 0)
+            ):
+                raise ValueError("labels require non-empty tasks and non-negative integers")
             clean[task] = label
         object.__setattr__(self, "labels", MappingProxyType(clean))
 
