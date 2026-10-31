@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from math import isfinite
+from numbers import Integral
 from types import MappingProxyType
 from typing import Iterable, Mapping
 
@@ -18,8 +19,13 @@ class TaskResult:
     metrics: Mapping[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if not self.task.strip() or self.support <= 0:
-            raise ValueError("task must be named and support must be positive")
+        if (
+            not self.task.strip()
+            or isinstance(self.support, bool)
+            or not isinstance(self.support, Integral)
+            or self.support <= 0
+        ):
+            raise ValueError("task must be named and support must be a positive integer")
         if not self.metrics or any(
             not name.strip() or not isfinite(value) for name, value in self.metrics.items()
         ):
