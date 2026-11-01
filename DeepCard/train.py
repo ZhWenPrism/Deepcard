@@ -7,11 +7,18 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.model_selection import StratifiedKFold
 
-from config import (MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY,
-                    MODEL, TRAIN, SEED)
-from model import DeepCard
-from losses import MultiTaskLoss, compute_class_weights
-from data import EchoDataset, add_gaussian_noise
+if __package__:
+    from .config import (MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY,
+                        MODEL, TRAIN, SEED)
+    from .model import DeepCard
+    from .losses import MultiTaskLoss, compute_class_weights
+    from .data import EchoDataset, add_gaussian_noise
+else:
+    from config import (MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY,
+                        MODEL, TRAIN, SEED)
+    from model import DeepCard
+    from losses import MultiTaskLoss, compute_class_weights
+    from data import EchoDataset, add_gaussian_noise
 
 
 def _make_loss(labels):

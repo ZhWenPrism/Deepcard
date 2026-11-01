@@ -4,7 +4,10 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+if __package__:
+    from .config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+else:
+    from config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
 
 
 class EchoDataset(Dataset):

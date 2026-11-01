@@ -7,7 +7,10 @@ absolute SHAP value across the dataset.
 import numpy as np
 import torch
 
-from config import FEATURE_ORDER
+if __package__:
+    from .config import FEATURE_ORDER
+else:
+    from config import FEATURE_ORDER
 
 
 class _TaskWrapper(torch.nn.Module):

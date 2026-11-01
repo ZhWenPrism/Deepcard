@@ -7,7 +7,10 @@ by bootstrap resampling (1,000 iterations).
 import numpy as np
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
 
-from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+if __package__:
+    from .config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+else:
+    from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
 
 
 def binary_metrics(y_true, y_prob, threshold=0.5):

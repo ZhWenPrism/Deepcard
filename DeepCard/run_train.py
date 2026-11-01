@@ -10,10 +10,16 @@ import pickle
 import pandas as pd
 import torch
 
-from config import MULTICLASS_TASKS, BINARY_TASKS
-from feature_engineering import add_derived_features, ZScoreScaler
-from data import order_features
-from train import cross_validate
+if __package__:
+    from .config import MULTICLASS_TASKS, BINARY_TASKS
+    from .feature_engineering import add_derived_features, ZScoreScaler
+    from .data import order_features
+    from .train import cross_validate
+else:
+    from config import MULTICLASS_TASKS, BINARY_TASKS
+    from feature_engineering import add_derived_features, ZScoreScaler
+    from data import order_features
+    from train import cross_validate
 
 
 def load_xy(csv_path):
