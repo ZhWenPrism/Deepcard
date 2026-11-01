@@ -36,8 +36,10 @@ def shap_global_importance(model, X_background, X_explain, task, device="cpu"):
     ex = torch.tensor(np.asarray(X_explain), dtype=torch.float32, device=device)
 
     explainer = shap.GradientExplainer(wrapper, bg)
-    sv = np.asarray(explainer.shap_values(ex))
-    # Average |SHAP| over samples (and classes for multi-class outputs)
-    mean_abs = np.mean(np.abs(sv), axis=tuple(range(sv.ndim - 1)))
-    mean_abs = np.asarray(mean_abs).reshape(-1)[:len(FEATURE_ORDER)]
+    values = explainer.shap_values(ex)
+    sv = np.stack(values, axis=-1) if isinstance(values, list) else np.asarray(values)
+    if sv.shape[:2] != tuple(ex.shape) or sv.ndim not in (2, 3):
+        raise ValueError("SHAP values must align with the sample and feature axes")
+    axes = (0, 2) if sv.ndim == 3 else (0,)
+    mean_abs = np.mean(np.abs(sv), axis=axes)
     return dict(zip(FEATURE_ORDER, mean_abs))
