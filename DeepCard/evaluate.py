@@ -7,7 +7,10 @@ by bootstrap resampling (1,000 iterations).
 import numpy as np
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
 
-from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+if __package__:
+    from .config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+else:
+    from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
 
 
 def binary_metrics(y_true, y_prob, threshold=0.5):
@@ -19,10 +22,12 @@ def binary_metrics(y_true, y_prob, threshold=0.5):
     prec = tp / (tp + fp) if (tp + fp) else 0.0
     f1 = 2 * prec * sens / (prec + sens) if (prec + sens) else 0.0
     acc = (tp + tn) / (tp + tn + fp + fn)
-    try:
-        auc = roc_auc_score(y_true, y_prob)
-    except ValueError:
-        auc = float("nan")
+    auc = float("nan")
+    if len(np.unique(y_true)) > 1:
+        try:
+            auc = roc_auc_score(y_true, y_prob)
+        except ValueError:
+            pass
     return dict(sensitivity=sens, specificity=spec, precision=prec,
                 f1=f1, accuracy=acc, auc=auc)
 
@@ -34,7 +39,7 @@ def bootstrap_ci(y_true, y_prob, metric="auc", n=BOOTSTRAP_N, seed=SEED):
     vals = []
     for _ in range(n):
         idx = rng.integers(0, len(y_true), len(y_true))
-        if len(np.unique(y_true[idx])) < 2:
+        if metric == "auc" and len(np.unique(y_true[idx])) < 2:
             continue
         vals.append(binary_metrics(y_true[idx], y_prob[idx])[metric])
     if not vals:

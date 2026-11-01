@@ -11,12 +11,20 @@ import pickle
 import pandas as pd
 import torch
 
-from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS
-from feature_engineering import add_derived_features
-from data import order_features
-from model import DeepCard
-from train import ensemble_predict
-from evaluate import evaluate_all
+if __package__:
+    from .config import MODEL, MULTICLASS_TASKS, BINARY_TASKS
+    from .feature_engineering import add_derived_features
+    from .data import order_features
+    from .model import DeepCard
+    from .train import ensemble_predict
+    from .evaluate import evaluate_all
+else:
+    from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS
+    from feature_engineering import add_derived_features
+    from data import order_features
+    from model import DeepCard
+    from train import ensemble_predict
+    from evaluate import evaluate_all
 
 
 def main():

@@ -8,7 +8,10 @@ module (8 multi-class severity heads + 9 binary heads). See manuscript section
 import torch
 import torch.nn as nn
 
-from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
+if __package__:
+    from .config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
+else:
+    from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
 
 
 class ResidualBlock1D(nn.Module):

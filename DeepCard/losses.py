@@ -10,7 +10,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from config import MULTICLASS_TASKS, BINARY_TASKS
+if __package__:
+    from .config import MULTICLASS_TASKS, BINARY_TASKS
+else:
+    from config import MULTICLASS_TASKS, BINARY_TASKS
 
 
 class MultiTaskLoss(nn.Module):
