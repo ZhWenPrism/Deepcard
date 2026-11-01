@@ -67,6 +67,10 @@ def smote_oversample(X, y, random_state=42):
     """
     from imblearn.over_sampling import SMOTE
     feat_index = {f: i for i, f in enumerate(FEATURE_ORDER)}
-    X_res, y_res = SMOTE(random_state=random_state).fit_resample(np.asarray(X), np.asarray(y))
-    keep = np.array([_physiologically_valid(r, feat_index) for r in X_res])
+    X, y = np.asarray(X), np.asarray(y)
+    X_res, y_res = SMOTE(random_state=random_state).fit_resample(X, y)
+    n_original = len(X)
+    synthetic_keep = np.array([_physiologically_valid(r, feat_index) for r in X_res[n_original:]], dtype=bool)
+    keep = np.concatenate([np.ones(n_original, dtype=bool), synthetic_keep])
+    print(f"SMOTE: original={n_original}, synthetic={len(synthetic_keep)}, retained_synthetic={int(synthetic_keep.sum())}")
     return X_res[keep], y_res[keep]
