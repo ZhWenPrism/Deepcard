@@ -13,12 +13,14 @@ if __package__:
     from .model import DeepCard
     from .losses import MultiTaskLoss, compute_class_weights
     from .data import EchoDataset, add_gaussian_noise
+    from .validation import feature_matrix, training_labels
 else:
     from config import (MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY,
                         MODEL, TRAIN, SEED)
     from model import DeepCard
     from losses import MultiTaskLoss, compute_class_weights
     from data import EchoDataset, add_gaussian_noise
+    from validation import feature_matrix, training_labels
 
 
 def _make_loss(labels):
@@ -50,8 +52,9 @@ def cross_validate(X, labels, device="cpu"):
     """Stratified 5-fold CV. Returns the list of trained fold models (ensemble)."""
     torch.manual_seed(SEED)
     np.random.seed(SEED)
-    X = np.asarray(X)
-    strat = np.asarray(labels[MULTICLASS_TASKS[0]]).astype(int)   # stratify on a primary task
+    X = feature_matrix(X)
+    labels = training_labels(labels, len(X))
+    strat = labels[MULTICLASS_TASKS[0]]   # stratify on a primary task
     skf = StratifiedKFold(n_splits=TRAIN["n_folds"], shuffle=True, random_state=SEED)
 
     models = []
