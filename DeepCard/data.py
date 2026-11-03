@@ -6,8 +6,10 @@ from torch.utils.data import Dataset
 
 if __package__:
     from .config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+    from .validation import feature_matrix, training_labels
 else:
     from config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+    from validation import feature_matrix, training_labels
 
 
 class EchoDataset(Dataset):
@@ -18,8 +20,10 @@ class EchoDataset(Dataset):
     """
 
     def __init__(self, X, labels):
-        self.X = torch.tensor(np.asarray(X), dtype=torch.float32)
-        self.labels = {t: torch.tensor(np.asarray(v)) for t, v in labels.items()}
+        X = feature_matrix(X)
+        labels = training_labels(labels, len(X))
+        self.X = torch.tensor(X, dtype=torch.float32)
+        self.labels = {t: torch.tensor(v) for t, v in labels.items()}
 
     def __len__(self):
         return self.X.shape[0]

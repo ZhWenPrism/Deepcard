@@ -12,8 +12,10 @@ import torch.nn.functional as F
 
 if __package__:
     from .config import MULTICLASS_TASKS, BINARY_TASKS
+    from .validation import label_vector
 else:
     from config import MULTICLASS_TASKS, BINARY_TASKS
+    from validation import label_vector
 
 
 class MultiTaskLoss(nn.Module):
@@ -46,7 +48,8 @@ class MultiTaskLoss(nn.Module):
 
 def compute_class_weights(labels, num_classes):
     """Inverse-frequency class weights for weighted cross-entropy."""
-    counts = np.bincount(np.asarray(labels).astype(int), minlength=num_classes).astype(float)
+    labels = label_vector(labels, num_classes)
+    counts = np.bincount(labels, minlength=num_classes).astype(float)
     counts[counts == 0] = 1.0
     w = counts.sum() / (num_classes * counts)
     return torch.tensor(w, dtype=torch.float32)
