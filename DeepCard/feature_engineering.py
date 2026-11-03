@@ -59,13 +59,21 @@ class ZScoreScaler:
 
     def fit(self, X):
         X = np.asarray(X, dtype=float)
+        if X.ndim != 2 or not X.shape[0] or not X.shape[1] or np.isinf(X).any():
+            raise ValueError("fit requires a non-empty two-dimensional matrix without infinite values")
+        if np.isnan(X).all(axis=0).any():
+            raise ValueError("fit requires at least one finite observation per feature")
         self.mean_ = np.nanmean(X, axis=0)
         self.std_ = np.nanstd(X, axis=0)
         self.std_[self.std_ == 0] = 1.0
         return self
 
     def transform(self, X):
+        if self.mean_ is None or self.std_ is None:
+            raise ValueError("the scaler must be fitted before transform")
         X = np.asarray(X, dtype=float)
+        if X.ndim != 2 or X.shape[1] != len(self.mean_) or np.isinf(X).any():
+            raise ValueError("transform requires a matrix with the fitted feature width and no infinite values")
         return (X - self.mean_) / self.std_
 
     def fit_transform(self, X):
