@@ -4,18 +4,28 @@ Metrics follow the manuscript "Statistical analysis and performance evaluation":
 sensitivity, specificity, precision, F1, accuracy, and AUC. 95% CIs are obtained
 by bootstrap resampling (1,000 iterations).
 """
+from numbers import Integral
+
 import numpy as np
 from sklearn.metrics import roc_auc_score, confusion_matrix, accuracy_score
 
 if __package__:
-    from .config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+    from .config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED, NUM_SEVERITY
+    from .validation import label_vector
 else:
-    from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED
+    from config import MULTICLASS_TASKS, BINARY_TASKS, BOOTSTRAP_N, SEED, NUM_SEVERITY
+    from validation import label_vector
 
 
 def binary_metrics(y_true, y_prob, threshold=0.5):
-    y_true = np.asarray(y_true).astype(int)
-    y_pred = (np.asarray(y_prob) >= threshold).astype(int)
+    y_true = label_vector(y_true, 2)
+    y_prob = np.asarray(y_prob, dtype=float)
+    if (y_prob.shape != y_true.shape or not np.isfinite(y_prob).all()
+            or (y_prob < 0).any() or (y_prob > 1).any()):
+        raise ValueError("binary probabilities must be aligned finite values in [0, 1]")
+    if not np.isfinite(threshold) or not 0 <= threshold <= 1:
+        raise ValueError("threshold must be finite and in [0, 1]")
+    y_pred = (y_prob >= threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
     sens = tp / (tp + fn) if (tp + fn) else 0.0
     spec = tn / (tn + fp) if (tn + fp) else 0.0
@@ -33,6 +43,10 @@ def binary_metrics(y_true, y_prob, threshold=0.5):
 
 
 def bootstrap_ci(y_true, y_prob, metric="auc", n=BOOTSTRAP_N, seed=SEED):
+    if isinstance(n, (bool, np.bool_)) or not isinstance(n, Integral) or n < 0:
+        raise ValueError("n must be a non-negative integer")
+    if metric not in binary_metrics(y_true, y_prob):
+        raise ValueError(f"unknown binary metric: {metric}")
     rng = np.random.default_rng(seed)
     y_true = np.asarray(y_true)
     y_prob = np.asarray(y_prob)
@@ -48,7 +62,13 @@ def bootstrap_ci(y_true, y_prob, metric="auc", n=BOOTSTRAP_N, seed=SEED):
 
 
 def multiclass_accuracy(y_true, y_prob):
-    return accuracy_score(np.asarray(y_true).astype(int), np.asarray(y_prob).argmax(axis=1))
+    y_true = label_vector(y_true, NUM_SEVERITY)
+    y_prob = np.asarray(y_prob, dtype=float)
+    if (y_prob.shape != (len(y_true), NUM_SEVERITY) or not np.isfinite(y_prob).all()
+            or (y_prob < 0).any() or (y_prob > 1).any()
+            or not np.allclose(y_prob.sum(axis=1), 1.0, rtol=0, atol=1e-6)):
+        raise ValueError("multiclass probabilities must be aligned normalised severity distributions")
+    return accuracy_score(y_true, y_prob.argmax(axis=1))
 
 
 def evaluate_all(y_true_dict, preds):
