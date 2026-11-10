@@ -2,6 +2,8 @@
 ensemble by averaging fold probabilities. See manuscript "Cross-validation and
 evaluation logic".
 """
+from numbers import Integral
+
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -79,21 +81,28 @@ def cross_validate(X, labels, device="cpu"):
 
 
 @torch.no_grad()
-def ensemble_predict(models, X, device="cpu"):
+def ensemble_predict(models, X, device="cpu", batch_size=512):
     """Average predicted probabilities across the fold models."""
     models = tuple(models)
     if not models:
         raise ValueError("the ensemble must contain at least one model")
-    Xt = torch.tensor(np.asarray(X), dtype=torch.float32, device=device)
-    mc = {t: [] for t in MULTICLASS_TASKS}
-    bn = {t: [] for t in BINARY_TASKS}
-    for m in models:
-        m.to(device).eval()
-        out, _ = m(Xt)
-        for t in MULTICLASS_TASKS:
-            mc[t].append(torch.softmax(out[t], dim=1).cpu().numpy())
-        for t in BINARY_TASKS:
-            bn[t].append(torch.sigmoid(out[t]).cpu().numpy())
-    preds = {t: np.mean(mc[t], axis=0) for t in MULTICLASS_TASKS}
-    preds.update({t: np.mean(bn[t], axis=0) for t in BINARY_TASKS})
-    return preds
+    if isinstance(batch_size, (bool, np.bool_)) or not isinstance(batch_size, Integral) or batch_size < 1:
+        raise ValueError("batch_size must be a positive integer")
+    X = feature_matrix(X)
+    for model in models:
+        model.to(device).eval()
+    predictions = {task: np.empty((len(X), NUM_SEVERITY), dtype=np.float32) for task in MULTICLASS_TASKS}
+    predictions.update({task: np.empty(len(X), dtype=np.float32) for task in BINARY_TASKS})
+    for start in range(0, len(X), batch_size):
+        end = start + batch_size
+        batch = torch.as_tensor(X[start:end], dtype=torch.float32, device=device)
+        probabilities = {task: [] for task in MULTICLASS_TASKS + BINARY_TASKS}
+        for model in models:
+            outputs, _ = model(batch)
+            for task in MULTICLASS_TASKS:
+                probabilities[task].append(torch.softmax(outputs[task], dim=1).cpu().numpy())
+            for task in BINARY_TASKS:
+                probabilities[task].append(torch.sigmoid(outputs[task]).cpu().numpy())
+        for task, values in probabilities.items():
+            predictions[task][start:end] = np.mean(values, axis=0)
+    return predictions

@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
+from numbers import Integral
 from typing import Iterable, Sequence
 
 
 def _labels(values: Iterable[int], classes: int) -> tuple[int, ...]:
+    if isinstance(classes, bool) or not isinstance(classes, Integral) or classes < 2:
+        raise ValueError("classes must be an integer of at least two")
     result = tuple(values)
     if not result or any(value not in range(classes) for value in result):
         raise ValueError(f"labels must be non-empty integers in [0, {classes - 1}]")
-    return result
+    return tuple(map(int, result))
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +36,7 @@ def binary_metrics(
         raise ValueError("probabilities must match labels and lie in [0, 1]")
     if not 0 <= threshold <= 1:
         raise ValueError("threshold must lie in [0, 1]")
+    scores = tuple(map(float, scores))
     predicted = [int(value >= threshold) for value in scores]
     tp = sum(actual == 1 and guess == 1 for actual, guess in zip(truth, predicted))
     tn = sum(actual == 0 and guess == 0 for actual, guess in zip(truth, predicted))
@@ -90,10 +94,15 @@ def multiclass_metrics(
 def expected_calibration_error(
     correctness: Sequence[bool | int], confidence: Sequence[float], bins: int = 10
 ) -> float:
+    correctness, confidence = tuple(correctness), tuple(confidence)
     if not correctness or len(correctness) != len(confidence):
         raise ValueError("correctness and confidence must be non-empty and aligned")
-    if bins <= 0 or any(not isfinite(value) or not 0 <= value <= 1 for value in confidence):
-        raise ValueError("bins must be positive and confidence must lie in [0, 1]")
+    if isinstance(bins, bool) or not isinstance(bins, Integral) or bins <= 0:
+        raise ValueError("bins must be a positive integer")
+    if any(value not in (0, 1) for value in correctness):
+        raise ValueError("correctness must contain binary values (0 or 1)")
+    if any(not isfinite(value) or not 0 <= value <= 1 for value in confidence):
+        raise ValueError("confidence must lie in [0, 1]")
     total = len(confidence)
     error = 0.0
     for index in range(bins):
