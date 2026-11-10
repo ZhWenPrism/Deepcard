@@ -94,10 +94,15 @@ def multiclass_metrics(
 def expected_calibration_error(
     correctness: Sequence[bool | int], confidence: Sequence[float], bins: int = 10
 ) -> float:
+    correctness, confidence = tuple(correctness), tuple(confidence)
     if not correctness or len(correctness) != len(confidence):
         raise ValueError("correctness and confidence must be non-empty and aligned")
-    if bins <= 0 or any(not isfinite(value) or not 0 <= value <= 1 for value in confidence):
-        raise ValueError("bins must be positive and confidence must lie in [0, 1]")
+    if isinstance(bins, bool) or not isinstance(bins, Integral) or bins <= 0:
+        raise ValueError("bins must be a positive integer")
+    if any(value not in (0, 1) for value in correctness):
+        raise ValueError("correctness must contain binary values (0 or 1)")
+    if any(not isfinite(value) or not 0 <= value <= 1 for value in confidence):
+        raise ValueError("confidence must lie in [0, 1]")
     total = len(confidence)
     error = 0.0
     for index in range(bins):
