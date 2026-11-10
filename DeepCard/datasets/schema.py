@@ -22,6 +22,7 @@ class TaskDefinition:
     classes: tuple[str, ...]
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "classes", tuple(self.classes))
         if not self.name.strip():
             raise ValueError("task name must not be empty")
         if len(self.classes) < 2 or len(set(self.classes)) != len(self.classes):
@@ -36,6 +37,7 @@ class FeatureSchema:
     units: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "names", tuple(self.names))
         if len(self.names) != 39 or len(set(self.names)) != 39:
             raise ValueError("DeepCard requires exactly 39 unique feature names")
         unknown = set(self.units) - set(self.names)
@@ -53,6 +55,7 @@ class ExamRecord:
     labels: Mapping[str, int | None] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "features", tuple(self.features))
         for name, value in (("patient_id", self.patient_id), ("exam_id", self.exam_id)):
             if not value.strip() or any(ch.isspace() for ch in value):
                 raise ValueError(f"{name} must be a non-empty token")
