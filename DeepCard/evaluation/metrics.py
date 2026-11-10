@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
+from numbers import Integral
 from typing import Iterable, Sequence
 
 
 def _labels(values: Iterable[int], classes: int) -> tuple[int, ...]:
+    if isinstance(classes, bool) or not isinstance(classes, Integral) or classes < 2:
+        raise ValueError("classes must be an integer of at least two")
     result = tuple(values)
     if not result or any(value not in range(classes) for value in result):
         raise ValueError(f"labels must be non-empty integers in [0, {classes - 1}]")
-    return result
+    return tuple(map(int, result))
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +36,7 @@ def binary_metrics(
         raise ValueError("probabilities must match labels and lie in [0, 1]")
     if not 0 <= threshold <= 1:
         raise ValueError("threshold must lie in [0, 1]")
+    scores = tuple(map(float, scores))
     predicted = [int(value >= threshold) for value in scores]
     tp = sum(actual == 1 and guess == 1 for actual, guess in zip(truth, predicted))
     tn = sum(actual == 0 and guess == 0 for actual, guess in zip(truth, predicted))
