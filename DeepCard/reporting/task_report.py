@@ -30,6 +30,7 @@ class TaskResult:
             not name.strip() or not isfinite(value) for name, value in self.metrics.items()
         ):
             raise ValueError("metrics must contain finite named values")
+        object.__setattr__(self, "support", int(self.support))
         object.__setattr__(self, "metrics", MappingProxyType(dict(self.metrics)))
 
 
