@@ -31,16 +31,16 @@ class MultiTaskLoss(nn.Module):
         for t in MULTICLASS_TASKS:
             w = self.class_weights.get(t)
             if w is not None:
-                w = w.to(outputs[t].device)
+                w = w.to(device=outputs[t].device, dtype=outputs[t].dtype)
             loss = F.cross_entropy(outputs[t], targets[t].long(), weight=w)
             total = total + self.task_weights.get(t, 1.0) * loss
             logs[t] = float(loss.detach())
         for t in BINARY_TASKS:
             pw = self.pos_weights.get(t)
             if pw is not None:
-                pw = pw.to(outputs[t].device)
+                pw = pw.to(device=outputs[t].device, dtype=outputs[t].dtype)
             loss = F.binary_cross_entropy_with_logits(
-                outputs[t], targets[t].float(), pos_weight=pw)
+                outputs[t], targets[t].to(dtype=outputs[t].dtype), pos_weight=pw)
             total = total + self.task_weights.get(t, 1.0) * loss
             logs[t] = float(loss.detach())
         return total, logs
