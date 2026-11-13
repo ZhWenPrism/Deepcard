@@ -9,8 +9,10 @@ import torch
 
 if __package__:
     from .config import FEATURE_ORDER
+    from .validation import feature_matrix
 else:
     from config import FEATURE_ORDER
+    from validation import feature_matrix
 
 
 class _TaskWrapper(torch.nn.Module):
@@ -29,11 +31,13 @@ class _TaskWrapper(torch.nn.Module):
 
 def shap_global_importance(model, X_background, X_explain, task, device="cpu"):
     """Return {feature: mean_abs_SHAP} for one task using GradientExplainer."""
+    background = feature_matrix(X_background)
+    explain = feature_matrix(X_explain)
     import shap
 
     wrapper = _TaskWrapper(model, task).to(device).eval()
-    bg = torch.tensor(np.asarray(X_background), dtype=torch.float32, device=device)
-    ex = torch.tensor(np.asarray(X_explain), dtype=torch.float32, device=device)
+    bg = torch.tensor(background, dtype=torch.float32, device=device)
+    ex = torch.tensor(explain, dtype=torch.float32, device=device)
 
     explainer = shap.GradientExplainer(wrapper, bg)
     values = explainer.shap_values(ex)

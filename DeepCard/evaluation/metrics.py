@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bisect import bisect_right
 from dataclasses import dataclass
 from math import isfinite
 from numbers import Integral
@@ -103,14 +104,12 @@ def expected_calibration_error(
         raise ValueError("correctness must contain binary values (0 or 1)")
     if any(not isfinite(value) or not 0 <= value <= 1 for value in confidence):
         raise ValueError("confidence must lie in [0, 1]")
-    total = len(confidence)
-    error = 0.0
-    for index in range(bins):
-        low, high = index / bins, (index + 1) / bins
-        members = [i for i, value in enumerate(confidence) if low <= value <= high if index == bins - 1 or value < high]
-        if not members:
-            continue
-        accuracy = sum(bool(correctness[i]) for i in members) / len(members)
-        mean_confidence = sum(confidence[i] for i in members) / len(members)
-        error += len(members) / total * abs(accuracy - mean_confidence)
-    return error
+    occupied = {}
+    for hit, value in zip(correctness, confidence):
+        index = bisect_right(range(1, bins), value, key=lambda edge: edge / bins)
+        count, hits, confidence_sum = occupied.get(index, (0, 0, 0))
+        occupied[index] = count + 1, hits + bool(hit), confidence_sum + value
+    return sum(
+        count / len(confidence) * abs(hits / count - confidence_sum / count)
+        for count, hits, confidence_sum in (occupied[index] for index in sorted(occupied))
+    )
