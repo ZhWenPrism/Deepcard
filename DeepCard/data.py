@@ -38,6 +38,10 @@ def order_features(df: pd.DataFrame) -> np.ndarray:
     missing = [f for f in FEATURE_ORDER if f not in df.columns]
     if missing:
         raise ValueError(f"Missing required features: {missing}")
+    duplicates = df.columns[df.columns.duplicated()]
+    duplicates = [f for f in FEATURE_ORDER if f in duplicates]
+    if duplicates:
+        raise ValueError(f"Duplicate required features: {duplicates}")
     return df[FEATURE_ORDER].to_numpy(dtype=float)
 
 
