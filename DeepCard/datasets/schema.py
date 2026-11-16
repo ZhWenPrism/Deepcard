@@ -27,8 +27,13 @@ class TaskDefinition:
             raise ValueError("task name must not be empty")
         if len(self.classes) < 2 or len(set(self.classes)) != len(self.classes):
             raise ValueError("task classes must contain at least two unique values")
-        if self.task_type is TaskType.BINARY and len(self.classes) != 2:
+        try:
+            task_type = TaskType(self.task_type)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("task_type must be binary or multiclass") from exc
+        if task_type is TaskType.BINARY and len(self.classes) != 2:
             raise ValueError("binary tasks require exactly two classes")
+        object.__setattr__(self, "task_type", task_type)
 
 
 @dataclass(frozen=True, slots=True)
