@@ -48,14 +48,17 @@ def bootstrap_ci(y_true, y_prob, metric="auc", n=BOOTSTRAP_N, seed=SEED):
     if metric not in binary_metrics(y_true, y_prob):
         raise ValueError(f"unknown binary metric: {metric}")
     rng = np.random.default_rng(seed)
-    y_true = np.asarray(y_true)
-    y_prob = np.asarray(y_prob)
+    y_true = np.asarray(y_true, dtype=np.int64)
+    y_prob = np.asarray(y_prob, dtype=float)
     vals = []
     for _ in range(n):
         idx = rng.integers(0, len(y_true), len(y_true))
-        if metric == "auc" and len(np.unique(y_true[idx])) < 2:
-            continue
-        vals.append(binary_metrics(y_true[idx], y_prob[idx])[metric])
+        truth, probabilities = y_true[idx], y_prob[idx]
+        if metric == "auc":
+            if len(np.unique(truth)) == 2:
+                vals.append(roc_auc_score(truth, probabilities))
+        else:
+            vals.append(binary_metrics(truth, probabilities)[metric])
     if not vals:
         return (float("nan"), float("nan"))
     return (float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5)))
