@@ -7,26 +7,16 @@ import argparse
 import os
 import pickle
 
-import pandas as pd
 import torch
 
 if __package__:
-    from .config import MULTICLASS_TASKS, BINARY_TASKS
-    from .feature_engineering import add_derived_features, ZScoreScaler
-    from .data import order_features
+    from .feature_engineering import ZScoreScaler
+    from .data import load_xy
     from .train import cross_validate
 else:
-    from config import MULTICLASS_TASKS, BINARY_TASKS
-    from feature_engineering import add_derived_features, ZScoreScaler
-    from data import order_features
+    from feature_engineering import ZScoreScaler
+    from data import load_xy
     from train import cross_validate
-
-
-def load_xy(csv_path):
-    df = add_derived_features(pd.read_csv(csv_path))
-    X = order_features(df)
-    labels = {t: df[t].to_numpy() for t in (MULTICLASS_TASKS + BINARY_TASKS)}
-    return X, labels
 
 
 def main():

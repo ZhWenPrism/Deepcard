@@ -6,9 +6,11 @@ from torch.utils.data import Dataset
 
 if __package__:
     from .config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+    from .feature_engineering import add_derived_features
     from .validation import feature_matrix, training_labels
 else:
     from config import FEATURE_ORDER, MULTICLASS_TASKS, BINARY_TASKS, TRAIN
+    from feature_engineering import add_derived_features
     from validation import feature_matrix, training_labels
 
 
@@ -43,6 +45,18 @@ def order_features(df: pd.DataFrame) -> np.ndarray:
     if duplicates:
         raise ValueError(f"Duplicate required features: {duplicates}")
     return df[FEATURE_ORDER].to_numpy(dtype=float)
+
+
+def load_xy(csv_path):
+    """Load a labeled cohort CSV for the training and evaluation entry points."""
+    frame = add_derived_features(pd.read_csv(csv_path))
+    tasks = MULTICLASS_TASKS + BINARY_TASKS
+    missing = [task for task in tasks if task not in frame.columns]
+    if missing:
+        raise ValueError(f"Missing task labels: {missing}")
+    features = order_features(frame)
+    labels = training_labels({task: frame[task].to_numpy() for task in tasks}, len(features))
+    return features, labels
 
 
 def add_gaussian_noise(x: torch.Tensor, std: float = TRAIN["gaussian_noise_std"]):

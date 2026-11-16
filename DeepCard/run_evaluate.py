@@ -8,20 +8,17 @@ import glob
 import os
 import pickle
 
-import pandas as pd
 import torch
 
 if __package__:
-    from .config import MODEL, MULTICLASS_TASKS, BINARY_TASKS
-    from .feature_engineering import add_derived_features
-    from .data import order_features
+    from .config import MODEL
+    from .data import load_xy
     from .model import DeepCard
     from .train import ensemble_predict
     from .evaluate import evaluate_all
 else:
-    from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS
-    from feature_engineering import add_derived_features
-    from data import order_features
+    from config import MODEL
+    from data import load_xy
     from model import DeepCard
     from train import ensemble_predict
     from evaluate import evaluate_all
@@ -33,8 +30,7 @@ def main():
     ap.add_argument("--artifacts", default="artifacts")
     args = ap.parse_args()
 
-    df = add_derived_features(pd.read_csv(args.test_csv))
-    X = order_features(df)
+    X, y_true = load_xy(args.test_csv)
     with open(os.path.join(args.artifacts, "scaler.pkl"), "rb") as f:
         scaler = pickle.load(f)
     Xs = scaler.transform(X)
@@ -49,7 +45,6 @@ def main():
         raise SystemExit("No fold checkpoints found in artifacts directory.")
 
     preds = ensemble_predict(models, Xs, device=device)
-    y_true = {t: df[t].to_numpy() for t in (MULTICLASS_TASKS + BINARY_TASKS)}
     results = evaluate_all(y_true, preds)
 
     for task, metrics in results.items():
