@@ -4,19 +4,20 @@ Usage:
     python run_evaluate.py --test_csv data/internal_test.csv --artifacts artifacts
 """
 import argparse
-import glob
 import os
 import pickle
 
 import torch
 
 if __package__:
+    from .artifacts import checkpoint_paths
     from .config import MODEL
     from .data import load_xy
     from .model import DeepCard
     from .train import ensemble_predict
     from .evaluate import evaluate_all
 else:
+    from artifacts import checkpoint_paths
     from config import MODEL
     from data import load_xy
     from model import DeepCard
@@ -37,7 +38,7 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     models = []
-    for path in sorted(glob.glob(os.path.join(args.artifacts, "deepcard_fold*.pt"))):
+    for path in checkpoint_paths(args.artifacts):
         m = DeepCard(MODEL).to(device)
         m.load_state_dict(torch.load(path, map_location=device))
         models.append(m)

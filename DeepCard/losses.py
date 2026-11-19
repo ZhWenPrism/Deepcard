@@ -5,6 +5,8 @@ Total loss = weighted sum of individual task losses:
   * binary tasks       -> weighted BCE-with-logits (pos_weight inverse to freq.)
 See manuscript "Model training strategy and optimization".
 """
+from math import isfinite
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -21,9 +23,24 @@ else:
 class MultiTaskLoss(nn.Module):
     def __init__(self, class_weights=None, pos_weights=None, task_weights=None):
         super().__init__()
-        self.class_weights = class_weights or {}   # {task: tensor(NUM_SEVERITY)}
-        self.pos_weights = pos_weights or {}       # {task: tensor(1)}
-        self.task_weights = task_weights or {}     # {task: float}
+        self.class_weights = dict(class_weights or {})   # {task: tensor(NUM_SEVERITY)}
+        self.pos_weights = dict(pos_weights or {})       # {task: tensor(1)}
+        self.task_weights = dict(task_weights or {})     # {task: float}
+        if (set(self.class_weights) - set(MULTICLASS_TASKS)
+                or set(self.pos_weights) - set(BINARY_TASKS)
+                or set(self.task_weights) - set(MULTICLASS_TASKS + BINARY_TASKS)):
+            raise ValueError("loss weights contain unknown task names")
+        for weight in self.class_weights.values():
+            if (not isinstance(weight, torch.Tensor) or weight.ndim != 1 or not weight.numel()
+                    or not torch.isfinite(weight).all() or (weight < 0).any() or not (weight > 0).any()):
+                raise ValueError("class weights must be a finite non-negative vector with a positive weight")
+        for weight in self.pos_weights.values():
+            if (not isinstance(weight, torch.Tensor) or weight.numel() != 1
+                    or not torch.isfinite(weight).all() or (weight < 0).any()):
+                raise ValueError("positive-class weights must be finite non-negative scalars")
+        resolved = [self.task_weights.get(t, 1.0) for t in MULTICLASS_TASKS + BINARY_TASKS]
+        if any(not isfinite(w) or w < 0 for w in resolved) or not any(w > 0 for w in resolved):
+            raise ValueError("task weights must be finite non-negative values with a positive weight")
 
     def forward(self, outputs, targets):
         total = 0.0

@@ -275,7 +275,7 @@ python run_evaluate.py --test_csv data/internal_test.csv --artifacts artifacts
 python run_evaluate.py --test_csv data/external.csv --artifacts artifacts
 ```
 
-Fold checkpoints and the fitted scaler are saved in `artifacts/`. Evaluation prints metrics for each task.
+Fold checkpoints, the fitted scaler, and `ensemble.json` are saved in `artifacts/`. Evaluation uses the manifest to select the trained folds and prints metrics for each task. Existing artifact directories without a manifest retain checkpoint discovery by filename.
 
 From the repository root, run the public utility tests with:
 

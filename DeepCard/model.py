@@ -5,6 +5,8 @@ measurements, followed by multi-head self-attention and a multi-task output
 module (8 multi-class severity heads + 9 binary heads). See manuscript section
 "Deep learning model architecture".
 """
+from numbers import Integral
+
 import torch
 import torch.nn as nn
 
@@ -23,6 +25,8 @@ class ResidualBlock1D(nn.Module):
 
     def __init__(self, channels, kernel_size=3, dropout=0.3):
         super().__init__()
+        if isinstance(kernel_size, bool) or not isinstance(kernel_size, Integral) or kernel_size < 1 or kernel_size % 2 == 0:
+            raise ValueError("kernel_size must be a positive odd integer")
         pad = kernel_size // 2
         self.conv1 = nn.Conv1d(channels, channels, kernel_size, padding=pad)
         self.bn1 = nn.BatchNorm1d(channels)
@@ -46,6 +50,8 @@ class DeepCard(nn.Module):
         super().__init__()
         C = cfg["hidden_channels"]
         k = cfg["kernel_size"]
+        if isinstance(k, bool) or not isinstance(k, Integral) or k < 1 or k % 2 == 0:
+            raise ValueError("kernel_size must be a positive odd integer")
 
         # Initial transformation: lift the standardized 39-vector into a
         # higher-dimensional latent space.  (B, 1, 39) -> (B, C, 39)

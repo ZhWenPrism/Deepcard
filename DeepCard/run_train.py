@@ -13,10 +13,12 @@ if __package__:
     from .feature_engineering import ZScoreScaler
     from .data import load_xy
     from .train import cross_validate
+    from .artifacts import write_checkpoint_manifest
 else:
     from feature_engineering import ZScoreScaler
     from data import load_xy
     from train import cross_validate
+    from artifacts import write_checkpoint_manifest
 
 
 def main():
@@ -37,6 +39,7 @@ def main():
         torch.save(m.state_dict(), os.path.join(args.out, f"deepcard_fold{i}.pt"))
     with open(os.path.join(args.out, "scaler.pkl"), "wb") as f:
         pickle.dump(scaler, f)
+    write_checkpoint_manifest(args.out, [f"deepcard_fold{i}.pt" for i in range(len(models))])
     print(f"Saved {len(models)} fold models + scaler to '{args.out}'")
 
 
