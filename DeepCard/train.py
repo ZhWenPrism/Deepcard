@@ -2,6 +2,7 @@
 ensemble by averaging fold probabilities. See manuscript "Cross-validation and
 evaluation logic".
 """
+from math import isfinite
 from numbers import Integral
 
 import numpy as np
@@ -52,6 +53,15 @@ def _train_epoch(model, loader, criterion, optimizer, device, noise_std):
 
 def cross_validate(X, labels, device="cpu"):
     """Stratified 5-fold CV. Returns the list of trained fold models (ensemble)."""
+    for name in ("epochs", "batch_size", "cosine_T_max", "n_folds"):
+        value = TRAIN[name]
+        minimum = 2 if name == "n_folds" else 1
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) or value < minimum:
+            raise ValueError(f"{name} must be an integer of at least {minimum}")
+    for name in ("lr", "weight_decay", "gaussian_noise_std"):
+        value = TRAIN[name]
+        if not isfinite(value) or value < 0 or (name == "lr" and value == 0):
+            raise ValueError(f"{name} must be finite and {'positive' if name == 'lr' else 'non-negative'}")
     torch.manual_seed(SEED)
     np.random.seed(SEED)
     X = feature_matrix(X)
