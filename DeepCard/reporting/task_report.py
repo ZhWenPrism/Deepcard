@@ -19,6 +19,11 @@ class TaskResult:
     metrics: Mapping[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        try:
+            task_type = TaskType(self.task_type)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("task_type must be binary or multiclass") from exc
+        object.__setattr__(self, "task_type", task_type)
         if (
             not self.task.strip()
             or isinstance(self.support, bool)
