@@ -13,10 +13,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 if __package__:
-    from .config import MULTICLASS_TASKS, BINARY_TASKS
+    from .config import MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
     from .validation import label_vector
 else:
-    from config import MULTICLASS_TASKS, BINARY_TASKS
+    from config import MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
     from validation import label_vector
 
 
@@ -31,9 +31,9 @@ class MultiTaskLoss(nn.Module):
                 or set(self.task_weights) - set(MULTICLASS_TASKS + BINARY_TASKS)):
             raise ValueError("loss weights contain unknown task names")
         for weight in self.class_weights.values():
-            if (not isinstance(weight, torch.Tensor) or weight.ndim != 1 or not weight.numel()
+            if (not isinstance(weight, torch.Tensor) or weight.ndim != 1 or weight.numel() != NUM_SEVERITY
                     or not torch.isfinite(weight).all() or (weight < 0).any() or not (weight > 0).any()):
-                raise ValueError("class weights must be a finite non-negative vector with a positive weight")
+                raise ValueError("class weights must have one finite non-negative value per severity class and a positive weight")
         for weight in self.pos_weights.values():
             if (not isinstance(weight, torch.Tensor) or weight.numel() != 1
                     or not torch.isfinite(weight).all() or (weight < 0).any()):
