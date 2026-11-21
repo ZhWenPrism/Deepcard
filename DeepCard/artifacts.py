@@ -30,6 +30,22 @@ def _staged_artifact(path):
             os.unlink(temporary)
 
 
+def load_scaler(path):
+    if __package__:
+        from .feature_engineering import ZScoreScaler
+    else:
+        from feature_engineering import ZScoreScaler
+
+    class ScalerUnpickler(pickle.Unpickler):
+        def find_class(self, module, name):
+            if module in {"feature_engineering", "DeepCard.feature_engineering"} and name == "ZScoreScaler":
+                return ZScoreScaler
+            return super().find_class(module, name)
+
+    with open(path, "rb") as handle:
+        return ScalerUnpickler(handle).load()
+
+
 def save_ensemble(directory, models, scaler):
     import torch
 

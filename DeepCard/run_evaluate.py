@@ -5,19 +5,18 @@ Usage:
 """
 import argparse
 import os
-import pickle
 
 import torch
 
 if __package__:
-    from .artifacts import checkpoint_paths
+    from .artifacts import checkpoint_paths, load_scaler
     from .config import MODEL
     from .data import load_xy
     from .model import DeepCard
     from .train import ensemble_predict
     from .evaluate import evaluate_all
 else:
-    from artifacts import checkpoint_paths
+    from artifacts import checkpoint_paths, load_scaler
     from config import MODEL
     from data import load_xy
     from model import DeepCard
@@ -32,8 +31,7 @@ def main():
     args = ap.parse_args()
 
     X, y_true = load_xy(args.test_csv)
-    with open(os.path.join(args.artifacts, "scaler.pkl"), "rb") as f:
-        scaler = pickle.load(f)
+    scaler = load_scaler(os.path.join(args.artifacts, "scaler.pkl"))
     Xs = scaler.transform(X)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
