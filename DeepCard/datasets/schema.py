@@ -25,7 +25,9 @@ class TaskDefinition:
         object.__setattr__(self, "classes", tuple(self.classes))
         if not self.name.strip():
             raise ValueError("task name must not be empty")
-        if len(self.classes) < 2 or len(set(self.classes)) != len(self.classes):
+        if (len(self.classes) < 2
+                or any(not isinstance(label, str) or not label.strip() for label in self.classes)
+                or len({label.strip() for label in self.classes}) != len(self.classes)):
             raise ValueError("task classes must contain at least two unique values")
         try:
             task_type = TaskType(self.task_type)
