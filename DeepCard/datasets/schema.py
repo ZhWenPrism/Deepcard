@@ -25,7 +25,9 @@ class TaskDefinition:
         object.__setattr__(self, "classes", tuple(self.classes))
         if not self.name.strip():
             raise ValueError("task name must not be empty")
-        if len(self.classes) < 2 or len(set(self.classes)) != len(self.classes):
+        if (len(self.classes) < 2
+                or any(not isinstance(label, str) or not label.strip() for label in self.classes)
+                or len({label.strip() for label in self.classes}) != len(self.classes)):
             raise ValueError("task classes must contain at least two unique values")
         try:
             task_type = TaskType(self.task_type)
@@ -43,7 +45,9 @@ class FeatureSchema:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "names", tuple(self.names))
-        if len(self.names) != 39 or len(set(self.names)) != 39:
+        if (len(self.names) != 39
+                or any(not isinstance(name, str) or not name.strip() for name in self.names)
+                or len({name.strip() for name in self.names}) != 39):
             raise ValueError("DeepCard requires exactly 39 unique feature names")
         unknown = set(self.units) - set(self.names)
         if unknown:
