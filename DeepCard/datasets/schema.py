@@ -45,7 +45,9 @@ class FeatureSchema:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "names", tuple(self.names))
-        if len(self.names) != 39 or len(set(self.names)) != 39:
+        if (len(self.names) != 39
+                or any(not isinstance(name, str) or not name.strip() for name in self.names)
+                or len({name.strip() for name in self.names}) != 39):
             raise ValueError("DeepCard requires exactly 39 unique feature names")
         unknown = set(self.units) - set(self.names)
         if unknown:
