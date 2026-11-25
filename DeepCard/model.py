@@ -11,9 +11,9 @@ import torch
 import torch.nn as nn
 
 if __package__:
-    from .config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
+    from .config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY, FEATURE_ORDER
 else:
-    from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY
+    from config import MODEL, MULTICLASS_TASKS, BINARY_TASKS, NUM_SEVERITY, FEATURE_ORDER
 
 
 class ResidualBlock1D(nn.Module):
@@ -83,6 +83,9 @@ class DeepCard(nn.Module):
         Returns (outputs, attention_weights) where outputs is a dict of raw
         logits per task (softmax/sigmoid are applied in the loss / at inference).
         """
+        if (x.dim() not in (2, 3) or x.shape[-1] != len(FEATURE_ORDER)
+                or (x.dim() == 3 and x.shape[1] != self.stem[0].in_channels)):
+            raise ValueError("model inputs must match the configured channels and 39-feature width")
         if x.dim() == 2:
             x = x.unsqueeze(1)                    # (B, 1, 39)
 
