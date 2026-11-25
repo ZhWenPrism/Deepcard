@@ -48,6 +48,9 @@ class DeepCard(nn.Module):
 
     def __init__(self, cfg=MODEL):
         super().__init__()
+        blocks = cfg["num_res_blocks"]
+        if isinstance(blocks, bool) or not isinstance(blocks, Integral) or blocks < 0:
+            raise ValueError("num_res_blocks must be a non-negative integer")
         C = cfg["hidden_channels"]
         k = cfg["kernel_size"]
         if isinstance(k, bool) or not isinstance(k, Integral) or k < 1 or k % 2 == 0:
